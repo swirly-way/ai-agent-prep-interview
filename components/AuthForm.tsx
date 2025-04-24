@@ -5,26 +5,43 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Form } from "@/components/ui/form";
 import Link from "next/link";
+import { toast } from "sonner";
 
-const formSchema = z.object({
-  username: z.string().min(2).max(50),
-});
+const authFormSchema = (type: FormType) => {
+  return z.object({
+    name: type === "sign-up" ? z.string().min(3) : z.string().optional(),
+    email: z.string().email(),
+    password: z.string().min(6),
+  });
+};
 
 const AuthForm = ({ type }: { type: FormType }) => {
+  const formSchema = authFormSchema(type);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      name: "",
+      email: "",
+      password: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    try {
+      if (type === "sign-up") {
+        console.log("SIGN UP", values);
+      } else {
+        console.log("SIGN IN", values);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(`There was an error: ${error}`);
+    }
   }
 
   const isSignIn = type === "sign-in";
